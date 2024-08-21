@@ -9,6 +9,10 @@ class MyComponent extends React.Component {
 
     handleClick = () => {
         console.log(`Click me my button`)
+        console.log(`My name is: ${this.state.name}`)
+        this.setState({
+            name: 'Ngoc Tai 2'
+        })
     }
 
     handleMoveOver = () => {
@@ -21,7 +25,7 @@ class MyComponent extends React.Component {
                 <br></br>
                 My name is: {this.state.name} and I'm from {this.state.address}
 
-                <button onClick={this.handleClick}>Click me</button>
+                <button onClick={() => { this.handleClick() }}>Click me</button>
                 <button onMouseOver={this.handleMoveOver}>Move over me</button>
 
 
