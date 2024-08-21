@@ -1,5 +1,5 @@
 import React from "react";
-import UserInfor from "./Userinfor";
+import UserInfor from "./AddUserInfor";
 
 class DisplayInfor extends React.Component {
 
