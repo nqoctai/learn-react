@@ -1,37 +1,44 @@
-import React from "react";
+import React, { useState } from "react";
 
-class AddUserInfor extends React.Component {
-    state = {
-        name: 'Ngoc Tai',
-        address: 'Binh Thuan',
-        age: 20
-    };
+const AddUserInfor = (props) => {
+    const [name, setName] = useState('');
+    const [age, setAge] = useState('');
+    const [address, setAddress] = useState('');
 
-    handleOnChangeInput = (event) => {
-        this.setState({ name: event.target.value })
+
+
+    const handleOnChangeInput = (event) => {
+        setName(event.target.value)
     }
 
-    handleOnSubMit = (event) => {
+    const handleOnSubMit = (event) => {
         event.preventDefault();
-        this.props.handleAddNewUser(
+        props.handleAddNewUser(
             {
                 id: Math.floor((Math.random() * 100) + 1) + '-random',
-                name: this.state.name,
-                age: this.state.age
+                name: name,
+                age: age
             }
         );
     }
-    render() {
-        return (
-            <div>
-                My name is: {this.state.name} and I'm {this.state.age}
-                <form onSubmit={(event) => { this.handleOnSubMit(event) }}>
-                    <input value={this.state.name} type="text" onChange={(event) => this.handleOnChangeInput(event)} />
-                    <button>Submit</button>
-                </form>
-            </div>
-        )
+
+    const handleChangeAge = (event) => {
+        setAge(event.target.value)
     }
+    return (
+        <div>
+            My name is: {name} and I'm {age}
+            <form onSubmit={(event) => { handleOnSubMit(event) }}>
+                <label>Your name: </label>
+                <input value={name} type="text" onChange={(event) => handleOnChangeInput(event)} />
+                <button>Submit</button>
+
+                <label>Your age: </label>
+                <input value={age} type="text" onChange={(event) => handleChangeAge(event)} />
+                <button>Submit</button>
+            </form>
+        </div>
+    )
 }
 
 
