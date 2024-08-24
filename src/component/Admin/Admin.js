@@ -1,6 +1,6 @@
 const Admin = (props) => {
     return (
-        <div>User component</div>
+        <div>Admin component</div>
     )
 }
 
