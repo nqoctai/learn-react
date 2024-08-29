@@ -11,6 +11,7 @@ import Login from './component/Auth/Login';
 import App from './App';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Register from "./component/Auth/Register";
 const Layout = () => {
     return (
         <>
@@ -27,6 +28,7 @@ const Layout = () => {
                 </Route>
 
                 <Route path='/login' element={<Login></Login>}></Route>
+                <Route path='/register' element={<Register></Register>}></Route>
             </Routes>
 
             <ToastContainer
