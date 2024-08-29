@@ -3,9 +3,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { postLogin } from "../../services/apiService";
 import { toast } from 'react-toastify';
+import { useDispatch } from "react-redux";
+import { ImSpinner10 } from 'react-icons/im';
+
 const Login = (props) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(false);
 
     const validateEmail = (email) => {
         return String(email)
@@ -26,18 +32,25 @@ const Login = (props) => {
             toast.error('Password is required');
             return;
         }
+        setIsLoading(true);
         // submit api
         let res = await postLogin(email, password);
         if (res && res.EC === 0) {
+            dispatch({
+                type: 'FETCH_USER_LOGIN_SUCCESS',
+                payload: res
+            })
             toast.success(res.EM);
+            setIsLoading(false);
             navigate('/')
         }
 
         if (res && res.EC !== 0) {
             toast.error(res.EM);
+            setIsLoading(false);
         }
     }
-    const navigate = useNavigate();
+
     return (
         <div className="login-container">
             <div className="header">
@@ -61,7 +74,12 @@ const Login = (props) => {
                 </div>
                 <span className="forgot-password">Forgot password</span>
                 <div>
-                    <button className="btn-submit" onClick={() => handleLogin()}>Login</button>
+                    <button className="btn-submit" onClick={() => handleLogin()}
+                        disabled={isLoading}
+                    >
+                        {isLoading === true && <ImSpinner10 className="loader-icon" />}
+                        <span>Login</span>
+                    </button>
                 </div>
                 <div className="text-center">
                     <span className="back" onClick={() => { navigate('/') }}> &#60;&#60;  Go to Homepage</span>
