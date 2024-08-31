@@ -12,13 +12,14 @@ import App from './App';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Register from "./component/Auth/Register";
+import ListQuiz from "./component/User/ListQuiz";
 const Layout = () => {
     return (
         <>
             <Routes>
                 <Route path="/" element={<App />} >
                     <Route index element={<HomePage></HomePage>} />
-                    <Route path="users" element={<User></User>} />
+                    <Route path="users" element={<ListQuiz />} />
 
                 </Route>
                 <Route path="/admins" element={<Admin />} >
