@@ -44,6 +44,7 @@ const DetailQuiz = () => {
                             questionsDescription = item.description;
                             image = item.image;
                         }
+                        item.answers.isSelected = false;
                         answers.push(item.answers);
                     })
                     return { questionId: key, answers, questionsDescription, image };
@@ -53,7 +54,27 @@ const DetailQuiz = () => {
             setDataQuiz(data);
         }
     }
-    console.log('params', params);
+
+    const handleCheckBox = (answerId, questionId) => {
+        let dataQuizClone = _.cloneDeep(dataQuiz);
+        let question = dataQuizClone.find(item => +item.questionId === +questionId)
+        if (question && question.answers) {
+            let b = question.answers.map(item => {
+                if (+item.id === +answerId) {
+                    item.isSelected = !item.isSelected;
+                }
+                return item;
+            })
+            question.answers = b;
+            console.log('question', question);
+        };
+        let index = dataQuizClone.findIndex(item => +item.questionId === +questionId)
+        if (index > -1) {
+            dataQuizClone[index] = question;
+            setDataQuiz(dataQuizClone);
+        }
+
+    }
     return (
         <div className="detail-quiz-container">
             <div className="left-content">
@@ -65,12 +86,14 @@ const DetailQuiz = () => {
                     <img></img>
                 </div>
                 <div className="q-content">
-                    <Question data={dataQuiz && dataQuiz.length > 0 ? dataQuiz[index] : []} index={index}></Question>
+                    <Question data={dataQuiz && dataQuiz.length > 0 ? dataQuiz[index] : []} index={index} handleCheckBox={handleCheckBox}></Question>
                 </div>
                 <div className="footer">
 
                     <button className="btn btn-secondary" onClick={() => handlePrev()}>Previous</button>
                     <button className="btn btn-primary" onClick={() => handleNext()}>Next</button>
+                    <button className="btn btn-warning" onClick={() => handleNext()}>Finish</button>
+
 
                 </div>
             </div>
