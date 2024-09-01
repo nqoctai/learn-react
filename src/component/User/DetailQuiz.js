@@ -1,13 +1,28 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { getDataQuiz } from "../../services/apiService";
 import _ from 'lodash';
 import './DetailQuiz.scss';
+import Question from "./Question";
 const DetailQuiz = () => {
     const params = useParams();
     const quizId = params.id;
     const location = useLocation();
+
+    const [dataQuiz, setDataQuiz] = useState([]);
+    const [index, setIndex] = useState(0);
     console.log('location', location);
+
+    const handlePrev = () => {
+        if (index - 1 < 0)
+            return;
+        setIndex(index - 1);
+    }
+
+    const handleNext = () => {
+        if (dataQuiz && dataQuiz.length > index + 1)
+            setIndex(index + 1);
+    }
     useEffect(() => {
         fetchQuestion();
     }, [quizId])
@@ -35,6 +50,7 @@ const DetailQuiz = () => {
                 })
                 .value();
             console.log('data', data);
+            setDataQuiz(data);
         }
     }
     console.log('params', params);
@@ -49,19 +65,12 @@ const DetailQuiz = () => {
                     <img></img>
                 </div>
                 <div className="q-content">
-                    <div className="question">How are you doing?</div>
-                    <div className="answer">
-                        <div className="a-child">A. asdadasda</div>
-                        <div className="a-child">B. asdadasda</div>
-                        <div className="a-child">C. asdadasda</div>
-
-                    </div>
-
+                    <Question data={dataQuiz && dataQuiz.length > 0 ? dataQuiz[index] : []} index={index}></Question>
                 </div>
                 <div className="footer">
 
-                    <button className="btn btn-secondary">Previous</button>
-                    <button className="btn btn-primary">Next</button>
+                    <button className="btn btn-secondary" onClick={() => handlePrev()}>Previous</button>
+                    <button className="btn btn-primary" onClick={() => handleNext()}>Next</button>
 
                 </div>
             </div>
