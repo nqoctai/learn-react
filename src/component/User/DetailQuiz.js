@@ -11,7 +11,6 @@ const DetailQuiz = () => {
 
     const [dataQuiz, setDataQuiz] = useState([]);
     const [index, setIndex] = useState(0);
-    console.log('location', location);
 
     const handlePrev = () => {
         if (index - 1 < 0)
@@ -29,7 +28,6 @@ const DetailQuiz = () => {
 
     const fetchQuestion = async () => {
         let res = await getDataQuiz(quizId);
-        console.log('res', res);
         if (res && res.EC === 0) {
             let raw = res.DT;
             let data = _.chain(raw)
@@ -50,7 +48,6 @@ const DetailQuiz = () => {
                     return { questionId: key, answers, questionsDescription, image };
                 })
                 .value();
-            console.log('data', data);
             setDataQuiz(data);
         }
     }
@@ -66,13 +63,39 @@ const DetailQuiz = () => {
                 return item;
             })
             question.answers = b;
-            console.log('question', question);
         };
         let index = dataQuizClone.findIndex(item => +item.questionId === +questionId)
         if (index > -1) {
             dataQuizClone[index] = question;
             setDataQuiz(dataQuizClone);
         }
+
+    }
+
+    const handleFinishQuiz = () => {
+        let payload = {
+            quizId: +quizId,
+            answers: []
+        }
+        let answers = [];
+        if (dataQuiz && dataQuiz.length > 0) {
+            dataQuiz.forEach(question => {
+                let questionId = question.questionId;
+                let userAnswerId = [];
+
+                question.answers.forEach(a => {
+                    if (a.isSelected) {
+                        userAnswerId.push(a.id);
+                    }
+                })
+                answers.push({
+                    questionId: +questionId,
+                    userAnswerId: userAnswerId
+                })
+            })
+        }
+        payload.answers = answers;
+        console.log(payload);
 
     }
     return (
@@ -92,7 +115,7 @@ const DetailQuiz = () => {
 
                     <button className="btn btn-secondary" onClick={() => handlePrev()}>Previous</button>
                     <button className="btn btn-primary" onClick={() => handleNext()}>Next</button>
-                    <button className="btn btn-warning" onClick={() => handleNext()}>Finish</button>
+                    <button className="btn btn-warning" onClick={() => handleFinishQuiz()}>Finish</button>
 
 
                 </div>
