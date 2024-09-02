@@ -1,6 +1,9 @@
 import "./ManageQuiz.scss";
 import Select from 'react-select';
 import { useState } from 'react';
+import { postCreateNewQuiz } from '../../../../services/apiService';
+import { toast } from 'react-toastify';
+import { set } from "nprogress";
 const options = [
     { value: 'EASY', label: 'EASY' },
     { value: 'MEDIUM', label: 'MEDIUM' },
@@ -10,13 +13,31 @@ const ManageQuiz = (props) => {
 
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [type, setType] = useState("EASY");
+    const [type, setType] = useState("");
     const [image, setImage] = useState(null);
 
     const handleChangeFile = (event) => {
-
+        if (event.target && event.target.files && event.target.files[0]) {
+            setImage(event.target.files[0]);
+        }
     }
 
+    const handleSubmitQuiz = async () => {
+        if (!name || !description) {
+            toast.error("Please fill all fields");
+            return;
+        }
+        let res = await postCreateNewQuiz(description, name, type?.value, image);
+        if (res && res.EC === 0) {
+            toast.success("Create new quiz success");
+            setName("");
+            setDescription("");
+            setType("");
+            setImage(null);
+        } else {
+            toast.error("Create new quiz fail");
+        }
+    }
     return (
         <div className="quiz-container">
             <div className="title">
@@ -30,7 +51,7 @@ const ManageQuiz = (props) => {
                     <div className="form-floating mb-3">
                         <input
                             type="text"
-                            class="form-control"
+                            className="form-control"
                             placeholder="your quiz name"
                             value={name} onChange={(event) => setName(event.target.value)} />
                         <label >Name</label>
@@ -38,7 +59,7 @@ const ManageQuiz = (props) => {
                     <div className="form-floating">
                         <input
                             type="text"
-                            class="form-control"
+                            className="form-control"
                             placeholder="Description..."
                             value={description} onChange={(event) => setDescription(event.target.value)}
                         />
@@ -46,14 +67,21 @@ const ManageQuiz = (props) => {
                     </div>
                     <div className="my-3">
                         <Select
-                            value={type}
-                            options={options} placeholder="Quizz type..." />
+                            defaultValue={type}
+                            onChange={setType}
+                            options={options}
+                            placeholder={"Quizz type..."} />
                     </div>
                     <div className="more-actions form-group">
                         <label className="mb-1">Upload Image</label>
                         <input type="file" className="form-control" onChange={(event) => handleChangeFile(event)} />
 
 
+                    </div>
+                    <div className="mt-3">
+                        <button className="btn btn-warning"
+                            onClick={() => handleSubmitQuiz()}
+                        >Save</button>
                     </div>
                 </fieldset>
             </div>
@@ -64,6 +92,7 @@ const ManageQuiz = (props) => {
 
         </div>
     )
+
 }
 
 export default ManageQuiz;
