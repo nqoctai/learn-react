@@ -1,14 +1,31 @@
 import Select from 'react-select';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './Questions.scss';
 import { BsFillPatchPlusFill, BsPatchMinusFill } from 'react-icons/bs';
 import { AiOutlineMinusCircle, AiFillPlusSquare } from 'react-icons/ai';
 import { RiImageAddFill } from 'react-icons/ri';
 import { v4 as uuidv4 } from 'uuid';
-import _ from 'lodash';
+import _, { set } from 'lodash';
 import Lightbox from "react-awesome-lightbox";
+import { toast } from 'react-toastify';
+import { getAllQuizForAdmin, postCreateNewAnswerForQuestion, postCreateNewQuestionForQuiz } from "../../../../services/apiService";
 
 const Questions = (props) => {
+    const initQuestions = [
+        {
+            id: uuidv4(),
+            description: '',
+            imageFile: '',
+            imageName: '',
+            answers: [
+                {
+                    id: uuidv4(),
+                    description: '',
+                    isCorrect: false
+                }
+            ]
+        }
+    ]
     const options = [
         { value: 'chocolate', label: 'Chocolate' },
         { value: 'strawberry', label: 'Strawberry' },
@@ -17,23 +34,7 @@ const Questions = (props) => {
 
     const [selectedQuiz, setSelectedQuiz] = useState({});
 
-    const [questions, setQuestions] = useState(
-        [
-            {
-                id: uuidv4(),
-                description: '',
-                imageFile: '',
-                imageName: '',
-                answers: [
-                    {
-                        id: uuidv4(),
-                        description: '',
-                        isCorrect: false
-                    }
-                ]
-            }
-        ]
-    )
+    const [questions, setQuestions] = useState(initQuestions)
 
     const [isPreviewImage, setIsPreviewImage] = useState(false);
 
@@ -41,6 +42,25 @@ const Questions = (props) => {
         url: '',
         title: ''
     });
+
+    const [listQuiz, setListQuiz] = useState([]);
+
+    useEffect(() => {
+        fetchQuiz();
+    }, [])
+
+    const fetchQuiz = async () => {
+        let res = await getAllQuizForAdmin();
+        if (res && res.EC === 0) {
+            let newQuiz = res.DT.map(item => {
+                return {
+                    value: item.id,
+                    label: `${item.id} - ${item.description}`
+                }
+            })
+            setListQuiz(newQuiz);
+        }
+    }
 
     const handleAddRemoveQuestion = (type, id) => {
         if (type === 'ADD') {
@@ -134,8 +154,75 @@ const Questions = (props) => {
         }
     }
 
-    const handleSubmitQuestionForQuiz = () => {
-        console.log('questions', questions);
+    const handleSubmitQuestionForQuiz = async () => {
+        console.log('questions', questions, selectedQuiz);
+
+        if (_.isEmpty(selectedQuiz)) {
+            toast.error('Please Choose a Quiz!');
+            return;
+        }
+        let isValidAnswer = true;
+        let indexQ = 0, indexA = 0;
+        //  validate answer
+        for (let i = 0; i < questions.length; i++) {
+            for (let j = 0; j < questions[i].answers.length; j++) {
+                indexA = j;
+                if (!questions[i].answers[j].description) {
+
+                    isValidAnswer = false;
+                    break;
+                }
+            }
+            indexQ = i;
+            if (isValidAnswer === false) break;
+        }
+        if (isValidAnswer === false) {
+            toast.error(`Not empty Answer ${indexA + 1} in Question ${indexQ + 1}`);
+        }
+
+
+        if (isValidAnswer === false) {
+            toast.error(`Not empty Answer ${indexA + 1} in Question ${indexQ + 1}`);
+        }
+
+        // validate question
+        let isValidQ = true;
+        let indexQ1 = 0;
+        for (let i = 0; i < questions.length; i++) {
+            if (!questions[i].description) {
+                isValidQ = false;
+                indexQ1 = i;
+                break;
+            }
+        }
+
+        if (isValidQ == false) {
+            toast.error(`Not empty Question ${indexQ1 + 1}`);
+        }
+
+        // submit questions
+        // postCreateNewQuestionForQuiz
+
+        // await Promise.all(questions.map(async (question) => {
+        //     const q = await postCreateNewQuestionForQuiz(+selectedQuiz.value, question.description, question.imageFile);
+        //     await Promise.all(question.answers.map(async (answer) => {
+        //         await postCreateNewAnswerForQuestion(answer.description, answer.isCorrect, q.DT.id);
+        //     }))
+        // }))
+
+
+
+        for (const question of questions) {
+            const q = await postCreateNewQuestionForQuiz(+selectedQuiz.value, question.description, question.imageFile);
+            for (const answer of question.answers) {
+                await postCreateNewAnswerForQuestion(answer.description, answer.isCorrect, q.DT.id);
+            }
+        }
+
+        toast.success('Submit Questions Success!');
+        setQuestions(initQuestions);
+
+
     }
 
     const handlePreviewImage = (questionId) => {
@@ -161,7 +248,7 @@ const Questions = (props) => {
                     <Select
                         defaultValue={selectedQuiz}
                         onChange={setSelectedQuiz}
-                        options={options}
+                        options={listQuiz}
                     />
                 </div>
 
