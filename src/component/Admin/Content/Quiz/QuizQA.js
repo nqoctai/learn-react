@@ -139,7 +139,7 @@ const QuizQA = (props) => {
         let questionsClone = _.cloneDeep(questions);
         if (type === 'ADD') {
             const newAnswer = {
-                id: "",
+                id: uuidv4(),
                 description: '',
                 isCorrect: false
 

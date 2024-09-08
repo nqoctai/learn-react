@@ -6,6 +6,7 @@ import './DetailQuiz.scss';
 import Question from "./Question";
 import ModalResult from "./ModalResult";
 import { set } from "nprogress";
+import RightContent from "./Content/RightContent";
 
 const DetailQuiz = () => {
     const params = useParams();
@@ -137,7 +138,7 @@ const DetailQuiz = () => {
                 </div>
             </div>
             <div className="right-content">
-                count down
+                <RightContent dataQuiz={dataQuiz}></RightContent>
             </div>
             <ModalResult show={isShowModalResult} setShow={setIsShowModalResult} dataModalResult={dataModalResult}></ModalResult>
         </div>
