@@ -1,6 +1,6 @@
 import Select from 'react-select';
 import { useEffect, useState } from 'react';
-import './Questions.scss';
+import './QuizQA.scss';
 import { BsFillPatchPlusFill, BsPatchMinusFill } from 'react-icons/bs';
 import { AiOutlineMinusCircle, AiFillPlusSquare } from 'react-icons/ai';
 import { RiImageAddFill } from 'react-icons/ri';
@@ -8,9 +8,9 @@ import { v4 as uuidv4 } from 'uuid';
 import _, { set } from 'lodash';
 import Lightbox from "react-awesome-lightbox";
 import { toast } from 'react-toastify';
-import { getAllQuizForAdmin, postCreateNewAnswerForQuestion, postCreateNewQuestionForQuiz } from "../../../../services/apiService";
+import { getAllQuizForAdmin, postCreateNewAnswerForQuestion, postCreateNewQuestionForQuiz, getQuizWithQA, postUpsertQA } from "../../../../services/apiService";
 
-const Questions = (props) => {
+const QuizQA = (props) => {
     const initQuestions = [
         {
             id: uuidv4(),
@@ -32,7 +32,7 @@ const Questions = (props) => {
         { value: 'vanilla', label: 'Vanilla' },
     ];
 
-    const [selectedQuiz, setSelectedQuiz] = useState({});
+
 
     const [questions, setQuestions] = useState(initQuestions)
 
@@ -44,10 +44,57 @@ const Questions = (props) => {
     });
 
     const [listQuiz, setListQuiz] = useState([]);
+    const [selectedQuiz, setSelectedQuiz] = useState({});
 
     useEffect(() => {
         fetchQuiz();
     }, [])
+
+    useEffect(() => {
+        if (selectedQuiz && selectedQuiz.value) {
+            fetchQuizWithQA();
+        }
+
+    }, [selectedQuiz])
+
+    // return a promise that resolves with a File instance
+    function urltoFile(url, filename, mimeType) {
+        if (url.startsWith('data:')) {
+            var arr = url.split(','),
+                mime = arr[0].match(/:(.*?);/)[1],
+                bstr = atob(arr[arr.length - 1]),
+                n = bstr.length,
+                u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            var file = new File([u8arr], filename, { type: mime || mimeType });
+            return Promise.resolve(file);
+        }
+        return fetch(url)
+            .then(res => res.arrayBuffer())
+            .then(buf => new File([buf], filename, { type: mimeType }));
+    }
+
+    const fetchQuizWithQA = async () => {
+        let res = await getQuizWithQA(selectedQuiz.value);
+
+        if (res && res.EC === 0) {
+            // convert base64 to file object
+            let newQA = [];
+            for (let i = 0; i < res.DT.qa.length; i++) {
+                let q = res.DT.qa[i];
+                if (q.imageFile) {
+                    q.imageName = `Question-${q.id}.png`;
+                    q.imageFile = await urltoFile(`data:image/png;base64,${q.imageFile}`, `Question-${q.id}.png`, 'image/png');
+                }
+                newQA.push(q);
+            }
+            setQuestions(newQA);
+            console.log('<<<<<<<newQA', newQA);
+
+        }
+    }
 
     const fetchQuiz = async () => {
         let res = await getAllQuizForAdmin();
@@ -86,14 +133,13 @@ const Questions = (props) => {
             questionsClone = questionsClone.filter(question => question.id !== id);
             setQuestions(questionsClone);
         }
-        console.log('questions', questions);
     }
 
     const handleAddRemoveAnswer = (type, questionId, answerId) => {
         let questionsClone = _.cloneDeep(questions);
         if (type === 'ADD') {
             const newAnswer = {
-                id: uuidv4(),
+                id: "",
                 description: '',
                 isCorrect: false
 
@@ -201,30 +247,36 @@ const Questions = (props) => {
             toast.error(`Not empty Question ${indexQ1 + 1}`);
         }
 
-        // submit questions
-        // postCreateNewQuestionForQuiz
-
-        // await Promise.all(questions.map(async (question) => {
-        //     const q = await postCreateNewQuestionForQuiz(+selectedQuiz.value, question.description, question.imageFile);
-        //     await Promise.all(question.answers.map(async (answer) => {
-        //         await postCreateNewAnswerForQuestion(answer.description, answer.isCorrect, q.DT.id);
-        //     }))
-        // }))
-
-
-
-        for (const question of questions) {
-            const q = await postCreateNewQuestionForQuiz(+selectedQuiz.value, question.description, question.imageFile);
-            for (const answer of question.answers) {
-                await postCreateNewAnswerForQuestion(answer.description, answer.isCorrect, q.DT.id);
+        let questionsClone = _.cloneDeep(questions);
+        for (let i = 0; i < questionsClone.length; i++) {
+            if (questionsClone[i].imageFile) {
+                questionsClone[i].imageFile = await toBase64(questionsClone[i].imageFile);
             }
         }
 
-        toast.success('Submit Questions Success!');
-        setQuestions(initQuestions);
+        let res = await postUpsertQA({
+            quizId: +selectedQuiz.value,
+            questions: questionsClone
+        });
+
+        if (res && res.EC === 0) {
+            toast.success('Submit Questions Success!');
+            fetchQuizWithQA();
+        }
+        console.log('res', res);
+
+
+        // setQuestions(initQuestions);
 
 
     }
+
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+    });
 
     const handlePreviewImage = (questionId) => {
         let questionsClone = _.cloneDeep(questions);
@@ -341,4 +393,4 @@ const Questions = (props) => {
     )
 }
 
-export default Questions;
+export default QuizQA;
