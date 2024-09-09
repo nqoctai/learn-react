@@ -5,6 +5,7 @@ import { postLogin } from "../../services/apiService";
 import { toast } from 'react-toastify';
 import { useDispatch } from "react-redux";
 import { ImSpinner10 } from 'react-icons/im';
+import { doLogin } from "../../redux/action/userAction";
 
 const Login = (props) => {
     const [email, setEmail] = useState('');
@@ -36,10 +37,7 @@ const Login = (props) => {
         // submit api
         let res = await postLogin(email, password);
         if (res && res.EC === 0) {
-            dispatch({
-                type: 'FETCH_USER_LOGIN_SUCCESS',
-                payload: res
-            })
+            dispatch(doLogin(res));
             toast.success(res.EM);
             setIsLoading(false);
             navigate('/')
@@ -48,6 +46,12 @@ const Login = (props) => {
         if (res && res.EC !== 0) {
             toast.error(res.EM);
             setIsLoading(false);
+        }
+    }
+
+    const handleKeyDown = (event) => {
+        if (event && event.key === 'Enter') {
+            handleLogin();
         }
     }
 
@@ -70,7 +74,12 @@ const Login = (props) => {
                 </div>
                 <div className="form-group">
                     <label>Password</label>
-                    <input type="password" className="form-control" value={password} onChange={(event) => setPassword(event.target.value)} />
+                    <input type="password"
+                        className="form-control"
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        onKeyDown={(event) => handleKeyDown(event)}
+                    />
                 </div>
                 <span className="forgot-password">Forgot password</span>
                 <div>
