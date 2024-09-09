@@ -138,7 +138,7 @@ const DetailQuiz = () => {
                 </div>
             </div>
             <div className="right-content">
-                <RightContent handleFinishQuiz={handleFinishQuiz} dataQuiz={dataQuiz}></RightContent>
+                <RightContent handleFinishQuiz={handleFinishQuiz} dataQuiz={dataQuiz} setIndex={setIndex}></RightContent>
             </div>
             <ModalResult show={isShowModalResult} setShow={setIsShowModalResult} dataModalResult={dataModalResult}></ModalResult>
         </div>
