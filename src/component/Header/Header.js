@@ -9,6 +9,7 @@ import { logout } from '../../services/apiService';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { doLogout } from '../../redux/action/userAction';
+import Language from './Languae';
 
 const Header = () => {
 
@@ -60,6 +61,8 @@ const Header = () => {
                                 </NavDropdown.Item>
                             </NavDropdown>
                         }
+                        <Language></Language>
+
                     </Nav>
                 </Navbar.Collapse>
             </Container>

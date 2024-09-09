@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { postRegister } from "../../services/apiService";
 import { toast } from 'react-toastify';
 import { VscEye, VscEyeClosed } from 'react-icons/vsc';
+import Language from "../Header/Languae";
 
 const Register = () => {
     const [email, setEmail] = useState('');
@@ -48,6 +49,7 @@ const Register = () => {
             <div className="header">
                 <span>Already have an account?</span>
                 <button onClick={() => navigate('/login')}>Sign in</button>
+                <Language></Language>
             </div>
             <div className="title col-4 mx-auto">
                 Quizz

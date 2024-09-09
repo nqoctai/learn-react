@@ -262,7 +262,8 @@ const QuizQA = (props) => {
         if (res && res.EC === 0) {
             toast.success('Submit Questions Success!');
             fetchQuizWithQA();
-        }
+        } else
+            toast.error(res.EM);
         console.log('res', res);
 
 
