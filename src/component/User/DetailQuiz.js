@@ -52,6 +52,7 @@ const DetailQuiz = () => {
                         item.answers.isSelected = false;
                         answers.push(item.answers);
                     })
+                    answers = _.orderBy(answers, ['id'], ['asc']);
                     return { questionId: key, answers, questionsDescription, image };
                 })
                 .value();
